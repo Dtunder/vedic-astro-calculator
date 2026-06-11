@@ -1,11 +1,15 @@
 import math
+import logging
 from typing import Dict, Tuple, Union
+
+logger = logging.getLogger(__name__)
 
 class VedicAstroCalculator:
     """A calculator for computing planetary coordinates for Vedic astrology."""
 
     def __init__(self) -> None:
         """Initializes the calculator with J2000 epoch and precomputes constants."""
+        logger.info("Initializing VedicAstroCalculator with J2000 epoch")
         # J2000 epoch
         self.epoch: float = 2451545.0
         
@@ -51,6 +55,7 @@ class VedicAstroCalculator:
                 'cos_I': math.cos(I_rad),
             }
             
+        logger.debug("Precomputing orbital elements for %d planets", len(raw_elements))
         # Moon specific precomputed constants
         self.e_moon = 0.0549
         self.I_moon = math.radians(5.145)
@@ -70,10 +75,13 @@ class VedicAstroCalculator:
             Eccentric anomaly in radians.
         """
         if not isinstance(M, (int, float)) or not isinstance(e, (int, float)):
+            logger.error("Invalid types for Kepler solver: M=%s, e=%s", type(M), type(e))
             raise TypeError("M and e must be numbers.")
         if not (0 <= e < 1):
+            logger.error("Eccentricity out of bounds: %s", e)
             raise ValueError("Eccentricity e must be in the range [0, 1).")
             
+        logger.debug("Solving Kepler's equation for M=%s, e=%s", M, e)
         M_rad = math.radians(M)
         E = M_rad
         for _ in range(10):
@@ -84,6 +92,7 @@ class VedicAstroCalculator:
                     raise ZeroDivisionError("Denominator in Newton's method became zero.")
                 delta_E = (E - e * math.sin(E) - M_rad) / denominator
             except ZeroDivisionError as err:
+                logger.exception("Zero division in Newton's method")
                 raise ValueError(f"Failed to solve Kepler's equation: {err}")
                 
             E -= delta_E
@@ -103,12 +112,16 @@ class VedicAstroCalculator:
             A tuple of (x, y, z) coordinates.
         """
         if not isinstance(planet, str):
+            logger.error("Planet name is not a string: %s", type(planet))
             raise TypeError("Planet name must be a string.")
         if planet not in self.elements:
+            logger.error("Planet not found: %s", planet)
             raise ValueError(f"Planet '{planet}' not found in elements. Supported planets: {list(self.elements.keys())}")
         if not isinstance(d, (int, float)):
+            logger.error("Days since epoch 'd' is not a number: %s", type(d))
             raise TypeError("Days since epoch 'd' must be a number.")
             
+        logger.debug("Calculating heliocentric coordinates for %s at d=%s", planet, d)
         elem = self.elements[planet]
         a = elem['a']
         e = elem['e']
@@ -137,6 +150,7 @@ class VedicAstroCalculator:
             
             return x_prime, y_prime, z_prime
         except Exception as err:
+            logger.exception("Error calculating heliocentric coordinates for %s", planet)
             raise RuntimeError(f"Error calculating heliocentric coordinates for {planet}: {err}")
 
     def calculate_moon_geocentric(self, d: Union[int, float]) -> Tuple[float, float]:
@@ -150,8 +164,10 @@ class VedicAstroCalculator:
             A tuple containing (moon_longitude, rahu_longitude).
         """
         if not isinstance(d, (int, float)):
+            logger.error("Days since epoch 'd' is not a number: %s", type(d))
             raise TypeError("Days since epoch 'd' must be a number.")
             
+        logger.debug("Calculating Moon geocentric coordinates at d=%s", d)
         L_moon = (218.316 + 13.176396 * d) % 360
         M_moon = (L_moon - (83.3532 + 0.11140353 * d)) % 360
         
@@ -180,6 +196,7 @@ class VedicAstroCalculator:
             lon = math.degrees(math.atan2(y_m, x_m)) % 360
             return lon, Omega_moon
         except Exception as err:
+            logger.exception("Error calculating Moon geocentric coordinates")
             raise RuntimeError(f"Error calculating Moon geocentric coordinates: {err}")
 
     def get_lahiri_ayanamsa(self, jd: Union[int, float]) -> float:
@@ -193,8 +210,10 @@ class VedicAstroCalculator:
             The Ayanamsa offset in degrees.
         """
         if not isinstance(jd, (int, float)):
+            logger.error("Julian Date 'jd' is not a number: %s", type(jd))
             raise TypeError("Julian Date 'jd' must be a number.")
             
+        logger.debug("Calculating Lahiri Ayanamsa for JD=%s", jd)
         d = jd - self.epoch
         years = d / 365.25
         # Lahiri Ayanamsa was approximately 23.85 degrees at J2000
@@ -212,14 +231,17 @@ class VedicAstroCalculator:
             A dictionary mapping graha names to their geocentric longitudes in degrees.
         """
         if not isinstance(jd, (int, float)):
+            logger.error("Julian Date 'jd' is not a number: %s", type(jd))
             raise TypeError("Julian Date 'jd' must be a number.")
             
+        logger.info("Calculating raw positions for JD=%s", jd)
         try:
             d = jd - self.epoch
             ex, ey, ez = self.calculate_heliocentric('Earth', d)
             
             # Sun is opposite to Earth from geocentric perspective
             if ex == 0 and ey == 0:
+                logger.error("Earth coordinates evaluate to zero.")
                 raise ValueError("Earth coordinates (ex, ey) evaluate to zero; cannot calculate Sun longitude.")
                 
             sx, sy = -ex, -ey
@@ -241,13 +263,16 @@ class VedicAstroCalculator:
                 gy = py - ey
                 
                 if gx == 0 and gy == 0:
+                    logger.error("Geocentric coordinates for %s evaluate to zero.", planet)
                     raise ValueError(f"Geocentric coordinates for {planet} evaluate to zero.")
                     
                 lon = math.degrees(math.atan2(gy, gx)) % 360
                 positions[planet] = lon
                 
+            logger.info("Raw positions calculated successfully.")
             return positions
         except Exception as err:
+            logger.exception("Error calculating raw positions for JD=%s", jd)
             raise RuntimeError(f"Error calculating raw positions: {err}")
 
     def calculate_nirayana_longitudes(self, jd: Union[int, float]) -> Dict[str, float]:
@@ -261,13 +286,18 @@ class VedicAstroCalculator:
             A dictionary mapping graha names to their Nirayana longitudes in degrees.
         """
         if not isinstance(jd, (int, float)):
+            logger.error("Julian Date 'jd' is not a number: %s", type(jd))
             raise TypeError("Julian Date 'jd' must be a number.")
             
+        logger.info("Calculating nirayana longitudes for JD=%s", jd)
         try:
             raw = self.calculate_raw_positions(jd)
             ayanamsa = self.get_lahiri_ayanamsa(jd)
             
             # Using dictionary comprehension
-            return {k: (v - ayanamsa) % 360 for k, v in raw.items()}
+            nirayana = {k: (v - ayanamsa) % 360 for k, v in raw.items()}
+            logger.info("Nirayana longitudes calculated successfully.")
+            return nirayana
         except Exception as err:
+            logger.exception("Error calculating nirayana longitudes for JD=%s", jd)
             raise RuntimeError(f"Error calculating nirayana longitudes: {err}")
