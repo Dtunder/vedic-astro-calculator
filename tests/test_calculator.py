@@ -40,5 +40,40 @@ class TestVedicAstroCalculator(unittest.TestCase):
             expected = (raw[k] - ayanamsa) % 360
             self.assertAlmostEqual(nirayana[k], expected, places=5)
 
+    def test_solve_kepler_validation(self):
+        # TypeError for non-numbers
+        with self.assertRaises(TypeError):
+            self.calc.solve_kepler("M", 0.1)
+        with self.assertRaises(TypeError):
+            self.calc.solve_kepler(100, "e")
+            
+        # ValueError for out of bounds eccentricity
+        with self.assertRaises(ValueError):
+            self.calc.solve_kepler(100, -0.1)
+        with self.assertRaises(ValueError):
+            self.calc.solve_kepler(100, 1.0)
+            
+    def test_calculate_heliocentric_validation(self):
+        # TypeError for wrong types
+        with self.assertRaises(TypeError):
+            self.calc.calculate_heliocentric(123, self.jd)
+        with self.assertRaises(TypeError):
+            self.calc.calculate_heliocentric("Earth", "d")
+            
+        # ValueError for unknown planet
+        with self.assertRaises(ValueError):
+            self.calc.calculate_heliocentric("Pluto", self.jd)
+
+    def test_jd_validation(self):
+        # Test methods taking jd/d raise TypeError for non-numbers
+        with self.assertRaises(TypeError):
+            self.calc.calculate_moon_geocentric("d")
+        with self.assertRaises(TypeError):
+            self.calc.get_lahiri_ayanamsa("jd")
+        with self.assertRaises(TypeError):
+            self.calc.calculate_raw_positions("jd")
+        with self.assertRaises(TypeError):
+            self.calc.calculate_nirayana_longitudes("jd")
+
 if __name__ == '__main__':
     unittest.main()
