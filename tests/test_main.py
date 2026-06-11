@@ -1,43 +1,60 @@
-import unittest
-import sys
 import io
+import os
+import sys
+import unittest
 from unittest.mock import patch
 
 # Adjust import path to find main.py from tests folder
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)
 
-import main
+import main  # noqa: E402
+
 
 class TestMain(unittest.TestCase):
     """
     Unit tests for the main application entry point.
     """
 
-    @patch('sys.stdout', new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
     def test_main(self, mock_stdout: io.StringIO) -> None:
         """
         Test the execution of the main script.
-        Validates that expected keywords and planet positions are written to stdout.
+        Validates keywords and planet positions are written to stdout.
         """
         # Run main function
         main.main()
-        
+
         # Capture the output
         output = mock_stdout.getvalue()
-        
+
         # Verify specific keywords are in output to ensure correctness
         self.assertIn("Welcome to vedic-astro-calculator!", output)
-        self.assertIn("Calculating planetary positions for Julian Date (JD): 2451545.0", output)
+        self.assertIn(
+            "Calculating planetary positions for Julian Date (JD): 2451545.0",
+            output,
+        )
         self.assertIn("--- Sayana (Tropical) Longitudes ---", output)
         self.assertIn("--- Nirayana (Sidereal) Longitudes ---", output)
-        
+
         # Verify planets are in output
-        planets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu']
+        planets = [
+            "Sun",
+            "Moon",
+            "Mars",
+            "Mercury",
+            "Jupiter",
+            "Venus",
+            "Saturn",
+            "Rahu",
+            "Ketu",
+        ]
         for planet in planets:
             self.assertIn(planet, output)
-            
+
         self.assertIn("Lahiri Ayanamsa:", output)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
