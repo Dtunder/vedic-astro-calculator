@@ -1,4 +1,10 @@
 import unittest
+import sys
+import os
+
+# Adjust import path to find calculator.py from tests folder
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from calculator import VedicAstroCalculator
 
 class TestVedicAstroCalculator(unittest.TestCase):
