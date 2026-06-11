@@ -378,9 +378,7 @@ class VedicAstroCalculator:
                 gy = py - ey
 
                 if gx == 0 and gy == 0:
-                    logger.error(
-                        "Geocen coords for %s are zero.", planet
-                    )
+                    logger.error("Geocen coords for %s are zero.", planet)
                     raise ValueError(f"Geocen coords for {planet} are zero.")
 
                 lon = math.degrees(math.atan2(gy, gx)) % 360

@@ -3,6 +3,7 @@ import random
 from typing import Dict, Any
 
 from resilience import retry_with_fallback
+from config import CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +31,9 @@ def local_fallback_config(*args: Any, **kwargs: Any) -> Dict[str, Any]:
     Fallback function that returns a default local configuration.
     """
     logger.info("Using local fallback configuration.")
-    return {
-        "status": "fallback",
-        "api_url": "http://localhost:8080/api",
-        "timeout_ms": 5000,
-        "features": {"advanced_calc": False},
-    }
+    fallback_cfg: Dict[str, Any] = CONFIG["simulation"]["fallback"].copy()
+    fallback_cfg["status"] = "fallback"
+    return fallback_cfg
 
 
 class RemoteConfigurationService:
@@ -44,18 +42,21 @@ class RemoteConfigurationService:
     but is prone to failures.
     """
 
-    def __init__(self, failure_rate: float = 0.5) -> None:
+    def __init__(self, failure_rate: float = -1.0) -> None:
         """
         Args:
             failure_rate (float): Probability (0.0 to 1.0) of a call failing.
         """
-        self.failure_rate = failure_rate
+        if failure_rate == -1.0:
+            self.failure_rate = float(CONFIG["simulation"]["failure_rate"])
+        else:
+            self.failure_rate = failure_rate
         self.call_count = 0
 
     @retry_with_fallback(
-        retries=3,
-        delay=0.1,  # Short delay for testing/simulation
-        backoff=2.0,
+        retries=CONFIG["simulation"]["retry"]["retries"],
+        delay=CONFIG["simulation"]["retry"]["delay"],
+        backoff=CONFIG["simulation"]["retry"]["backoff"],
         exceptions=(NetworkError, TimeoutError, BadConfigurationError),
         fallback=local_fallback_config,
     )
@@ -85,9 +86,6 @@ class RemoteConfigurationService:
                 )
 
         logger.info("Successfully fetched remote configuration.")
-        return {
-            "status": "success",
-            "api_url": "https://api.vedic-astro.remote/v1",
-            "timeout_ms": 2000,
-            "features": {"advanced_calc": True},
-        }
+        success_cfg: Dict[str, Any] = CONFIG["simulation"]["success"].copy()
+        success_cfg["status"] = "success"
+        return success_cfg

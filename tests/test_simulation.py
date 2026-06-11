@@ -44,7 +44,8 @@ class TestSimulation(unittest.TestCase):
     def test_fetch_config_bad_configuration_triggers_fallback(
         self, mock_choice: MagicMock
     ) -> None:
-        # Always fail with BadConfigurationError. Should retry 3 times, then fallback.
+        # Always fail with BadConfigurationError.
+        # Should retry 3 times, then fallback.
         result = self.service.fetch_config()
         self.assertEqual(result["status"], "fallback")
         self.assertEqual(self.service.call_count, 4)

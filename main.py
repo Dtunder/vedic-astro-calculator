@@ -1,6 +1,7 @@
 import logging
 import json
 from calculator import VedicAstroCalculator
+from config import CONFIG
 
 
 class JsonFormatter(logging.Formatter):
@@ -56,8 +57,8 @@ def main() -> None:
     logger.info("Application started: vedic-astro-calculator")
     print("Welcome to vedic-astro-calculator!")
 
-    # J2000 epoch as an example JD
-    jd = 2451545.0
+    # Load jd from configuration
+    jd = CONFIG["main"]["jd"]
     logger.info("Calculating positions for Julian Date (JD): %s", jd)
     print(f"Calculating planetary positions for Julian Date (JD): {jd}\n")
 

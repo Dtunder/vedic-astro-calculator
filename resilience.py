@@ -62,9 +62,7 @@ def retry_with_fallback(
                             str(e),
                         )
                         if fallback:
-                            logger.info(
-                                "Calling fallback for %s", func_name
-                            )
+                            logger.info("Calling fallback for %s", func_name)
                             return fallback(*args, **kwargs)
                         raise
 

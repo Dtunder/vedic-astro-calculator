@@ -1,0 +1,27 @@
+{
+  "simulation": {
+    "failure_rate": 0.5,
+    "fallback": {
+      "api_url": "http://localhost:8080/api",
+      "timeout_ms": 5000,
+      "features": {
+        "advanced_calc": false
+      }
+    },
+    "success": {
+      "api_url": "https://api.vedic-astro.remote/v1",
+      "timeout_ms": 2000,
+      "features": {
+        "advanced_calc": true
+      }
+    },
+    "retry": {
+      "retries": 3,
+      "delay": 0.1,
+      "backoff": 2.0
+    }
+  },
+  "main": {
+    "jd": 2451545.0
+  }
+}
