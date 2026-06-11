@@ -5,10 +5,18 @@ from typing import Dict, Tuple, Union
 logger = logging.getLogger(__name__)
 
 class VedicAstroCalculator:
-    """A calculator for computing planetary coordinates for Vedic astrology."""
+    """
+    A calculator for computing planetary coordinates for Vedic astrology.
+    
+    This class precomputes elements at instantiation based on the J2000 epoch
+    to quickly calculate both raw (Sayana/tropical) and Nirayana (sidereal)
+    planetary longitudes for the 9 Vedic grahas.
+    """
 
     def __init__(self) -> None:
-        """Initializes the calculator with J2000 epoch and precomputes constants."""
+        """
+        Initializes the calculator with J2000 epoch and precomputes constants.
+        """
         logger.info("Initializing VedicAstroCalculator with J2000 epoch")
         # J2000 epoch
         self.epoch: float = 2451545.0
@@ -68,11 +76,11 @@ class VedicAstroCalculator:
         Solves Kepler's equation M = E - e*sin(E) using Newton's method.
         
         Args:
-            M: Mean anomaly in degrees.
-            e: Eccentricity.
+            M (Union[int, float]): Mean anomaly in degrees.
+            e (Union[int, float]): Eccentricity.
             
         Returns:
-            Eccentric anomaly in radians.
+            float: Eccentric anomaly in radians.
         """
         if not isinstance(M, (int, float)) or not isinstance(e, (int, float)):
             logger.error("Invalid types for Kepler solver: M=%s, e=%s", type(M), type(e))
@@ -105,11 +113,11 @@ class VedicAstroCalculator:
         Calculates heliocentric ecliptic coordinates for a given planet and days since epoch (d).
         
         Args:
-            planet: Name of the planet.
-            d: Days since epoch.
+            planet (str): Name of the planet.
+            d (Union[int, float]): Days since epoch.
             
         Returns:
-            A tuple of (x, y, z) coordinates.
+            Tuple[float, float, float]: A tuple of (x, y, z) coordinates in AU.
         """
         if not isinstance(planet, str):
             logger.error("Planet name is not a string: %s", type(planet))
@@ -158,10 +166,10 @@ class VedicAstroCalculator:
         Calculates geocentric ecliptic longitude for Moon, Rahu (North Node) based on simple elements.
         
         Args:
-            d: Days since epoch.
+            d (Union[int, float]): Days since epoch.
             
         Returns:
-            A tuple containing (moon_longitude, rahu_longitude).
+            Tuple[float, float]: A tuple containing (moon_longitude, rahu_longitude) in degrees.
         """
         if not isinstance(d, (int, float)):
             logger.error("Days since epoch 'd' is not a number: %s", type(d))
@@ -204,10 +212,10 @@ class VedicAstroCalculator:
         Calculates a simplified Lahiri Ayanamsa offset.
         
         Args:
-            jd: Julian Date.
+            jd (Union[int, float]): Julian Date.
             
         Returns:
-            The Ayanamsa offset in degrees.
+            float: The Ayanamsa offset in degrees.
         """
         if not isinstance(jd, (int, float)):
             logger.error("Julian Date 'jd' is not a number: %s", type(jd))
@@ -225,10 +233,10 @@ class VedicAstroCalculator:
         Calculates raw (Sayana/tropical) geocentric longitudes for 9 grahas.
         
         Args:
-            jd: Julian Date.
+            jd (Union[int, float]): Julian Date.
             
         Returns:
-            A dictionary mapping graha names to their geocentric longitudes in degrees.
+            Dict[str, float]: A dictionary mapping graha names to their geocentric longitudes in degrees.
         """
         if not isinstance(jd, (int, float)):
             logger.error("Julian Date 'jd' is not a number: %s", type(jd))
@@ -280,10 +288,10 @@ class VedicAstroCalculator:
         Calculates Nirayana (sidereal) longitudes for 9 grahas by subtracting Ayanamsa.
         
         Args:
-            jd: Julian Date.
+            jd (Union[int, float]): Julian Date.
             
         Returns:
-            A dictionary mapping graha names to their Nirayana longitudes in degrees.
+            Dict[str, float]: A dictionary mapping graha names to their Nirayana longitudes in degrees.
         """
         if not isinstance(jd, (int, float)):
             logger.error("Julian Date 'jd' is not a number: %s", type(jd))

@@ -3,7 +3,20 @@ import json
 from calculator import VedicAstroCalculator
 
 class JsonFormatter(logging.Formatter):
-    def format(self, record):
+    """
+    A custom logging formatter that outputs log records as JSON strings.
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        Formats the given log record into a JSON string.
+
+        Args:
+            record: The log record to format.
+
+        Returns:
+            The formatted log record as a JSON string.
+        """
         log_record = {
             "time": self.formatTime(record, self.datefmt),
             "level": record.levelname,
@@ -14,7 +27,11 @@ class JsonFormatter(logging.Formatter):
             log_record["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_record)
 
-def setup_logging():
+def setup_logging() -> None:
+    """
+    Configures the root logger to output structured JSON logs to standard output.
+    Avoids adding duplicate handlers if they are already configured.
+    """
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     
@@ -25,7 +42,11 @@ def setup_logging():
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-def main():
+def main() -> None:
+    """
+    The main execution entrypoint for the vedic-astro-calculator application.
+    Calculates and prints the Sayana and Nirayana planetary longitudes for the J2000 epoch.
+    """
     setup_logging()
     logger = logging.getLogger(__name__)
     

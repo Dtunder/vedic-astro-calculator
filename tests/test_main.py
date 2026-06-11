@@ -10,8 +10,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import main
 
 class TestMain(unittest.TestCase):
+    """
+    Unit tests for the main application entry point.
+    """
+
     @patch('sys.stdout', new_callable=io.StringIO)
-    def test_main(self, mock_stdout):
+    def test_main(self, mock_stdout: io.StringIO) -> None:
+        """
+        Test the execution of the main script.
+        Validates that expected keywords and planet positions are written to stdout.
+        """
         # Run main function
         main.main()
         
