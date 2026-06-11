@@ -11,19 +11,19 @@ logger = logging.getLogger(__name__)
 class NetworkError(Exception):
     """Exception raised for simulated network errors."""
 
-    pass
+
 
 
 class TimeoutError(Exception):
     """Exception raised for simulated timeout errors."""
 
-    pass
+
 
 
 class BadConfigurationError(Exception):
     """Exception raised for simulated bad configuration errors."""
 
-    pass
+
 
 
 def local_fallback_config(*args: Any, **kwargs: Any) -> Dict[str, Any]:
@@ -60,7 +60,7 @@ class RemoteConfigurationService:
         exceptions=(NetworkError, TimeoutError, BadConfigurationError),
         fallback=local_fallback_config,
     )
-    def fetch_config(self) -> Dict[str, Any]:
+    def fetch_config(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """
         Simulates fetching configuration from a remote server.
         May randomly fail with NetworkError or TimeoutError.
@@ -78,12 +78,11 @@ class RemoteConfigurationService:
 
             if error_type == NetworkError:
                 raise NetworkError("Connection refused by remote host.")
-            elif error_type == TimeoutError:
+            if error_type == TimeoutError:
                 raise TimeoutError("Request to remote host timed out.")
-            else:
-                raise BadConfigurationError(
-                    "Remote host returned invalid configuration data."
-                )
+            raise BadConfigurationError(
+                "Remote host returned invalid configuration data."
+            )
 
         logger.info("Successfully fetched remote configuration.")
         success_cfg: Dict[str, Any] = CONFIG["simulation"]["success"].copy()

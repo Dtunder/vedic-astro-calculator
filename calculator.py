@@ -352,7 +352,7 @@ class VedicAstroCalculator:
         logger.info("Calculating raw positions for JD=%s", jd)
         try:
             d = jd - self.epoch
-            ex, ey, ez = self.calculate_heliocentric("Earth", d)
+            ex, ey, _ = self.calculate_heliocentric("Earth", d)
 
             # Sun is opposite to Earth from geocentric perspective
             if ex == 0 and ey == 0:
@@ -372,7 +372,7 @@ class VedicAstroCalculator:
 
             # Other planets
             for planet in ("Mercury", "Venus", "Mars", "Jupiter", "Saturn"):
-                px, py, pz = self.calculate_heliocentric(planet, d)
+                px, py, _ = self.calculate_heliocentric(planet, d)
                 # Geocentric coordinates
                 gx = px - ex
                 gy = py - ey

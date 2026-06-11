@@ -1,5 +1,7 @@
 # vedic-astro-calculator
 
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+
 A basic planetary coordinate calculator in Python. It computes the coordinates using simplified Keplerian orbital elements for the 9 Vedic grahas (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu). 
 
 It features methods to calculate raw geocentric positions (Sayana/tropical longitudes) for a given Julian Date (JD) and also applies a simplified Lahiri Ayanamsa offset to return Nirayana (sidereal) longitudes.
